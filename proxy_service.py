@@ -14,6 +14,8 @@ class ProxyDispatcher(object):
     def get_proxy(self, proxyReq):
         proxy = proxy_thrift.Proxy()
         proxy.url = "http://www.google.com"
+        # e = proxy_thrift.ExceptionError(1, "error")
+        # raise e
         return proxy
 
 

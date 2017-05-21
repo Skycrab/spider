@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import absolute_import
+import logging
+import socket
 
 import thriftpy
 from thrift_connector import ClientPool, ThriftPyCyClient
@@ -9,7 +11,7 @@ from spider import setting
 
 proxy_thrift = thriftpy.load("resource/proxy.thrift", module_name="proxy_thrift")
 
-
+logger = logging.getLogger(__name__)
 
 class ProxyClient(object):
     """代理服务客户端简单封装"""
@@ -29,7 +31,12 @@ class ProxyClient(object):
         """
         req = proxy_thrift.ProxyReq()
         req.url = url
-        return  cls.proxy.get_proxy(req)
+        try:
+            response = cls.proxy.get_proxy(req)
+            return response
+        except Exception as e:
+            logging.exception(e)
+            return None
 
 
 if __name__ == "__main__":

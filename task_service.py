@@ -8,7 +8,10 @@ import thriftpy
 from thriftpy.rpc import make_server
 from thriftpy.thrift import TProcessor
 
+
+import spider.log
 from spider.proxy_client import ProxyClient
+
 
 
 logger = logging.getLogger(__name__)
@@ -25,20 +28,18 @@ class TaskDispatcher(object):
         return response
 
     @classmethod
-    def failed(cls):
-        raise task_thrift.ExceptionError(1, "异常")
-
+    def failed(cls, code, message):
+        response = task_thrift.TaskResponse(code, message)
+        print(response)
+        return response
 
     """任务处理"""
     def add_task(self, req):
         logger.info("receive task:%s", req)
         print(req)
-        try:
-            proxy = ProxyClient.get_proxy(req.url)
-        except Exception as e:
-            logger.exception(e)
-            print(e)
-            return self.failed()
+        proxy = ProxyClient.get_proxy(req.url)
+        if proxy is None:
+            return self.failed(500, "内部错误")
         return self.success()
 
 
@@ -48,6 +49,7 @@ def main():
                          '127.0.0.1', 8000)
     print("serving...")
     server.serve()
+
 
 '''
 gunicorn运行模式
